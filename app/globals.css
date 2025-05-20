@@ -9,6 +9,7 @@
 
   --color-swhite: #FAF7EF;
   --color-sblack: #000000;
+  --color-tx-secondary: #4b4a47;
 }
 
 .loader-button {
@@ -17,11 +18,26 @@
   clip-path: path("M5 1h90c0 1 .6 3 3 3s3-2 3-3h36c0 3.2 2.667 4.144 4 4.216V39c-3.2 0-4 2.667-4 4h-35c0-1.333-.8-4-4-4s-4 2.667-4 4H5c0-3.6-2.667-4.167-4-4V5c3.2 0 4-2.667 4-4Z");
 }
 
-.custom-border {
+.custom-border-left {
   border-top-width: 1px;
   border-left-width: 1px;
-  border-right-width: 1px;
+  border-right-width: 0px;
   border-bottom-width: 1px;
-  border-left-style: dashed;
-
+  border-color: var(--color-swhite);
 }
+
+
+.custom-border-right {
+  border-width: 1px;
+  border-style: solid;        /* solid all sides */
+  border-color: var(--color-swhite);  /* general color */
+  border-left-style: dashed;  /* dashed left */
+  border-left-color: var(--color-black);  /* left color override */
+}
+
+.custom-border-top {
+  border-top-width: 1px;
+  border-style: dashed;
+  border-color: var(--color-black);
+}
+  

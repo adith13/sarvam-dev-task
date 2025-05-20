@@ -147,10 +147,23 @@ const MovieCard: React.FC<CardProps> = ({
                             </div>
                         </div>
                     </div>
-                    <CustomButton
-                        buttonText="Explore"
-                        onClick={() => {}}
-                    />
+
+                    <div>
+
+                        <CustomButton
+                            children="Explore"
+                            onClick={() => { }}
+                            height={42}
+                            width1={96}
+                            width2={42}
+                            size={5}
+                            mainclass="text-[12px] leading-[0] tracking-widest uppercase font-family-neue"
+                            beforeclass="bg-none text-swhite"
+                            afterclass="bg-swhite text-black"
+                            strokeColor="#FAF7EF"
+                            strokeWidth={2}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

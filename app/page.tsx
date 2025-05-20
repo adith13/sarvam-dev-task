@@ -1,8 +1,7 @@
-import Image from "next/image";
 import Loader from "./components/loader";
-import Carousel from "./components/carousal";
 import React from "react";
 import MovieCard from "./components/card";
+import Navbar from "./components/navbar";
 
 export default function Home() {
 
@@ -53,7 +52,7 @@ export default function Home() {
     <div className="flex flex-col justify-center items-center w-full h-full min-h-screen bg-black">
       <Loader />
       {/* <Carousel /> */}
-
+      <Navbar />
       <div className="flex flex-col justify-center items-center w-full h-full min-h-screen bg-black">
         {movies.map((movie) => (
           <MovieCard
@@ -63,6 +62,10 @@ export default function Home() {
             director="Director Name" index={0} yOffset={0} scrollContainerRef={movie.scrollContainerRef} />
         ))}
       </div>
+
+
+
+
     </div>
   );
 }

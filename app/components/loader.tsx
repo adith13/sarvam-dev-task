@@ -2,8 +2,6 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import ClippedDiv from "./clippedDiv";
-import { div, p } from "motion/react-client";
 import CustomButton from "./customButton";
 
 const NUM_LINES = 20;
@@ -24,7 +22,7 @@ const Loader = () => {
         <AnimatePresence>
             {isVisible && (
                 <motion.div
-                    className="z-50 fixed inset-0 flex flex-row w-full h-screen bg-swhite"
+                    className="z-[1000] fixed inset-0 flex flex-row w-full h-screen bg-swhite"
                     initial={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -100 }}
                     transition={{ duration: 0.7, ease: "easeInOut" }}
@@ -57,11 +55,27 @@ const Loader = () => {
                             film foundation
                         </motion.span>
 
-                        <CustomButton
-                            buttonText="Enter"
-                            onClick={handleExit}
-                            width={142}
-                        />
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.5, delay: 2 }}
+                            className="bottom-12 absolute"
+                        >
+
+                            <CustomButton
+                                children="Enter"
+                                onClick={handleExit}
+                                height={42}
+                                width1={96}
+                                width2={42}
+                                size={5}
+                                mainclass="text-[12px] leading-[0] tracking-widest uppercase  font-family-neue"
+                                beforeclass="bg-black text-swhite"
+                                afterclass="bg-swhite text-black"
+                                strokeColor="#FAF7EF"
+                                strokeWidth={3}
+                            />
+                        </motion.div>
 
                     </div>
 
