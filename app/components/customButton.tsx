@@ -2,7 +2,6 @@
 
 import { motion } from "motion/react";
 import { CustomDiv } from "./customDiv";
-import { useState } from "react";
 
 const ChevronIcon: React.FC<{ color: string }> = ({ color }) => {
   return (
@@ -44,13 +43,22 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   strokeWidth = 2,
 }) => {
 
+
+  const playHoverSound = () => {
+    const audio = new Audio('/sounds/cta_in.mp3');
+    audio.volume = 0.5; // optional
+    audio.playbackRate = 1; // optional
+    audio.play();
+  };
+
   return (
     <motion.button
       onClick={onClick}
+      onMouseEnter={playHoverSound}
       whileHover="hover"
       initial="initial"
       animate="initial"
-      className="flex flex-row justify-center w-full h-full 1px]"
+      className="flex flex-row justify-center w-full h-full hover:cursor-pointer"
     >
       {/* Text Container */}
       <CustomDiv height={height} width={width1} size={size}

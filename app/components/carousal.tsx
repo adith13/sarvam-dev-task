@@ -1,210 +1,179 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import Image from "next/image";
+import { useRef, useEffect, useState } from "react";
+import MovieCard from "./card";
+import gsap from "gsap";
+import { Draggable } from "gsap/Draggable";
+import { InertiaPlugin } from "gsap/InertiaPlugin";
 
-type CarouselImage = {
-  id: number;
-  src: string;
-  alt: string;
-};
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(Draggable, InertiaPlugin);
+}
 
-const IMAGES = [
+const ITEM_HEIGHT = 630;
+
+const movies = [
   {
     id: 1,
-    src: 'https://cdn.cosmos.so/0262f3e8-cfce-44ba-a08a-d67b0df2de92?format=jpeg',
-    alt: 'Carousel image 1'
+    image: "https://film-grab.com/wp-content/uploads/2020/04/08-752.jpg",
+    title: "TABOO",
+    director: "SHAULY MELAMED",
   },
   {
     id: 2,
-    src: 'https://cdn.cosmos.so/fc5ac665-12e9-43cd-a15e-42e452da6042?format=jpeg',
-    alt: 'Carousel image 2'
+    image: "https://cdn.cosmos.so/fc5ac665-12e9-43cd-a15e-42e452da6042?format=jpeg",
+    title: "ANA MAXIM",
+    director: "GUY RITCHIE",
   },
   {
     id: 3,
-    src: 'https://cdn.cosmos.so/86ef199a-71ba-4f6d-b0c8-ea3a4870f269?format=jpeg',
-    alt: 'Carousel image 3'
+    image: "https://cdn.cosmos.so/86ef199a-71ba-4f6d-b0c8-ea3a4870f269?format=jpeg",
+    title: "OUTSIDER FREUD",
+    director: "Chris Nolan",
   },
   {
     id: 4,
-    src: 'https://cdn.cosmos.so/e42117c6-7f07-4812-b7e8-7b0c58694aef?format=jpeg',
-    alt: 'Carousel image 4'
+    image: "https://cdn.cosmos.so/e42117c6-7f07-4812-b7e8-7b0c58694aef?format=jpeg",
+    title: "SAVOY",
+    director: "Tony Stark",
   },
   {
     id: 5,
-    src: 'https://cdn.cosmos.so/8497ef2b-aa76-41af-9081-46a9bf4d541a?format=jpeg',
-    alt: 'Carousel image 5'
+    image: "https://cdn.cosmos.so/8497ef2b-aa76-41af-9081-46a9bf4d541a?format=jpeg",
+    title: "SARVAM",
+    director: "Adith Narein",
   },
 ];
 
-export default function FilmRollCarousel() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startY, setStartY] = useState(0);
-  const [scrollTop, setScrollTop] = useState(0);
-  const [scrollSpeed, setScrollSpeed] = useState(0);
-  const lastScrollTime = useRef(0);
-  const lastScrollTop = useRef(0);
-  const animationFrame = useRef<number | null>(null);
-  // Duplicate images for infinite scroll effect
-  const extendedImages = [...IMAGES, ...IMAGES, ...IMAGES];
-  const itemHeight = 400; // Height of each image item
-  const totalHeight = extendedImages.length * itemHeight;
+const FilmRollCarousel = () => {
+  const listRef = useRef<HTMLDivElement>(null);
+  const [scrollY, setScrollY] = useState(0);
+  const fullList = [...movies, ...movies, ...movies]; // prev + main + next
+  const numOriginalMovies = movies.length; // Number of items in one logical set
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let _currentLogicalY = 0; // Initialize with the physical starting position
 
-  // Handle mouse/touch start
-  const handleStart = (clientY: number) => {
-    setIsDragging(true);
-    setStartY(clientY);
-    setScrollSpeed(0);
-    if (containerRef.current) {
-      setScrollTop(containerRef.current.scrollTop);
-    }
-    cancelAnimationFrame(animationFrame.current!);
-  };
-
-  // Handle mouse/touch move
-  const handleMove = useCallback((clientY: number) => {
-    if (!isDragging || !containerRef.current) return;
-    
-    const now = Date.now();
-    const timeDiff = now - lastScrollTime.current;
-    
-    if (timeDiff > 0) {
-      const currentScroll = containerRef.current.scrollTop;
-      const velocity = (currentScroll - lastScrollTop.current) / timeDiff;
-      setScrollSpeed(velocity);
-      lastScrollTop.current = currentScroll;
-      lastScrollTime.current = now;
-    }
-    
-    const y = clientY - startY;
-    containerRef.current.scrollTop = scrollTop - y;
-  }, [isDragging, scrollTop, startY]);
-
-  // Handle mouse/touch end
-  const handleEnd = useCallback(() => {
-    if (!isDragging || !containerRef.current) return;
-    
-    setIsDragging(false);
-    
-    // Apply momentum scrolling based on speed
-    if (Math.abs(scrollSpeed) > 0.1) {
-      const momentum = scrollSpeed * 2000; // Adjust multiplier for momentum strength
-      let targetScroll = containerRef.current.scrollTop - momentum;
-      
-      // Apply easing and snap to nearest item
-      const snapTo = Math.round(targetScroll / itemHeight) * itemHeight;
-      
-      // Ensure we stay within bounds
-      const maxScroll = totalHeight - containerRef.current.clientHeight;
-      const finalScroll = Math.max(0, Math.min(snapTo, maxScroll));
-      
-      containerRef.current.scrollTo({
-        top: finalScroll,
-        behavior: 'smooth'
-      });
-    } else {
-      // Snap to nearest item if speed is low
-      const snapTo = Math.round(containerRef.current.scrollTop / itemHeight) * itemHeight;
-      containerRef.current.scrollTo({
-        top: snapTo,
-        behavior: 'smooth'
-      });
-    }
-  }, [isDragging, itemHeight, scrollSpeed, totalHeight]);
-
-  // Set up event listeners
   useEffect(() => {
-    const container = containerRef.current;
+    const container = listRef.current;
     if (!container) return;
 
-    const handleMouseDown = (e: MouseEvent) => handleStart(e.clientY);
-    const handleMouseMove = (e: MouseEvent) => handleMove(e.clientY);
-    const handleMouseUp = () => handleEnd();
-    const handleTouchStart = (e: TouchEvent) => handleStart(e.touches[0].clientY);
-    const handleTouchMove = (e: TouchEvent) => handleMove(e.touches[0].clientY);
-    const handleTouchEnd = () => handleEnd();
+    const totalHeightOfOneSet = numOriginalMovies * ITEM_HEIGHT;
+    const centerOffset = window.innerHeight / 2 - ITEM_HEIGHT / 2;
 
-    container.addEventListener('mousedown', handleMouseDown);
-    container.addEventListener('mousemove', handleMouseMove);
-    container.addEventListener('mouseup', handleMouseUp);
-    container.addEventListener('mouseleave', handleMouseUp);
-    container.addEventListener('touchstart', handleTouchStart);
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
-    container.addEventListener('touchend', handleTouchEnd);
+    // The initial Y position to place the *middle* set of movies centered.
+    // We want the element that corresponds to the 'numOriginalMovies' index
+    // (the first item of the main copy) to be visually centered.
+    // If the list started at Y=0, this item would be at Y = numOriginalMovies * ITEM_HEIGHT.
+    // To center it, we need to shift the whole container by:
+    // (centerOffset - (numOriginalMovies * ITEM_HEIGHT))
+    const initialY = centerOffset - (numOriginalMovies * ITEM_HEIGHT);
+    gsap.set(container, { y: initialY });
 
-    // Initial scroll to center
-    container.scrollTop = (totalHeight - container.clientHeight) / 2;
+    // Define the wrap range for the *virtual* loop.
+    // This range corresponds to the height of a single set of original movies.
+    // When the Draggable's 'y' property (the container's transform) goes outside this range,
+    // Draggable.wrap will automatically adjust it back into the range, creating the loop.
+    // The range represents the positions relative to the *top* of the full list.
+    // Example: if 3 items, ITEM_HEIGHT=100. totalHeightOfOneSet=300.
+    // wrapMin = -300, wrapMax = 0.
+    // When y is -300, it's at the start of a "virtual" copy.
+    // When y is 0, it's at the end of a "virtual" copy.
+    const wrapMin = -totalHeightOfOneSet;
+    const wrapMax = 0;
+
+    // This variable tracks the *logical* scroll position, which is unbounded and continuous.
+    // It's essential for correct snapping across the wrapped jumps.
+    _currentLogicalY = initialY; // Initialize with the physical starting position
+
+    const dragInstance = Draggable.create(container, {
+      type: "y",
+      inertia: true,
+      // `liveSnap` can also be used here if you want items to snap during the drag itself.
+      // snap is applied on drag end and throw complete.
+      snap: {
+        y: (y) => {
+          // Compute logical scroll position from physical y
+          const logicalY = y - initialY;
+
+          // Nearest card index based on current scroll position
+          const nearestIndex = Math.round(logicalY / ITEM_HEIGHT);
+
+          // Compute snapped logical Y
+          const snappedLogicalY = nearestIndex * ITEM_HEIGHT;
+
+          // Convert logical to physical Y (with initialY as base)
+          const targetPhysicalY = snappedLogicalY + initialY;
+
+          // Wrap it so it stays within visual loop
+          const wrappedY = gsap.utils.wrap(wrapMin, wrapMax, targetPhysicalY);
+
+          return wrappedY;
+        },
+      },
+      
+      // Crucial for infinite loop: When y goes outside [wrapMin, wrapMax], it "teleports".
+      // Note: wrapY operates on the *element's transform* directly, ensuring seamless visual transition
+      wrapY: [wrapMin, wrapMax],
+      onDrag: function () {
+        _currentLogicalY = this.y - initialY;
+      },
+      onThrowUpdate: function () {
+        _currentLogicalY = this.y - initialY;
+      },
+      onThrowComplete: function () {
+        // Snap the logicalY based on actual snapped value
+        _currentLogicalY = this.y - initialY;
+      },
+      onPress: function () {
+        _currentLogicalY = this.y - initialY;
+      },
+      
+      // Optional: Add `bounds` if you want to limit how far the user can initially drag
+      // before the wrapping takes over, but `wrapY` already handles the main looping.
+      // bounds: {
+      //   minY: initialY - totalHeightOfOneSet,
+      //   maxY: initialY + totalHeightOfOneSet,
+      // },
+    })[0];
 
     return () => {
-      container.removeEventListener('mousedown', handleMouseDown);
-      container.removeEventListener('mousemove', handleMouseMove);
-      container.removeEventListener('mouseup', handleMouseUp);
-      container.removeEventListener('mouseleave', handleMouseUp);
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      container.removeEventListener('touchend', handleTouchEnd);
-      cancelAnimationFrame(animationFrame.current!);
+      dragInstance?.kill();
     };
-  }, [handleEnd, handleMove, totalHeight]);
-
-  // Handle infinite scroll
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      // When near the top, wrap to bottom
-      if (container.scrollTop < itemHeight) {
-        container.scrollTop = totalHeight - (container.clientHeight * 2);
-      }
-      // When near the bottom, wrap to top
-      else if (container.scrollTop > totalHeight - container.clientHeight - itemHeight) {
-        container.scrollTop = container.clientHeight;
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [itemHeight, totalHeight]);
+  }, []);
 
   return (
-    <div className="w-full h-screen overflow-hidden bg-black">
-      <div 
-        ref={containerRef}
-        className="w-full h-full overflow-y-auto snap-mandatory snap-y scrollbar-hide"
-        style={{
-          scrollSnapType: 'y mandatory',
-          WebkitOverflowScrolling: 'touch',
-          scrollBehavior: isDragging ? 'auto' : 'smooth',
-        }}
+    <div className="relative w-full h-screen overflow-hidden bg-black">
+      {/* Gradients to hide the top/bottom cut-off of items */}
+      <div className="top-0 z-50 absolute w-full h-[200px] bg-gradient-to-b from-black to-transparent" />
+      <div className="bottom-0 z-50 absolute w-full h-[200px] bg-gradient-to-t from-black to-transparent" />
+
+      <div
+        ref={listRef}
+        className="flex flex-col items-center cursor-grab will-change-transform"
+        style={{ touchAction: "none", userSelect: "none" }}
+        onScroll={() => setScrollY(listRef.current?.scrollTop || 0)}
       >
-        <div className="flex flex-col">
-          {extendedImages.map((image, index) => (
-            <div 
-              key={`${image.id}-${index}`} 
-              className="relative w-full h-[80vh] snap-start"
-              style={{
-                minHeight: '100vh',
-                scrollSnapAlign: 'start',
-              }}
-            >
-              <div className="top-0 sticky flex justify-center items-center p-4 h-screen">
-                <div className="relative rounded-lg w-full h-[80vh] overflow-hidden shadow-2xl">
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    className="object-cover pointer-events-none"
-                    priority={index < 5}
-                    sizes="(max-width: 768px) 90vw, 70vw"
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        {fullList.map((movie, index) => (
+          <div
+            key={`${movie.id}-${index}`}
+            className="flex justify-center items-center w-11/12"
+            style={{ height: `${ITEM_HEIGHT}px` }}
+          >
+            <MovieCard
+              image={movie.image}
+              title={movie.title}
+              director={movie.director}
+              index={index} // This index is the *physical* index in fullList
+              yOffset={scrollY + (index * ITEM_HEIGHT)}
+              scrollContainerRef={listRef}
+              totalItems={fullList.length}
+              itemHeight={ITEM_HEIGHT}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );
-}
+};
+
+export default FilmRollCarousel;

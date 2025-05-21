@@ -41,3 +41,7 @@
   border-color: var(--color-black);
 }
   
+.container {
+  width: 1200px; /* or any responsive width */
+  aspect-ratio: 354 / 209;
+}
