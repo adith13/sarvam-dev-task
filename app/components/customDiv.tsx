@@ -19,7 +19,7 @@ import React, { useId } from "react";
  *   cutout.
  * @property {number} [strokeWidth=2] - The width of the stroke around the cutout.
  */
-export interface CustomDivProps {
+export interface CustomDivProps extends React.HTMLAttributes<HTMLDivElement> {
     children?: React.ReactNode;
     className?: string;
     height?: number;

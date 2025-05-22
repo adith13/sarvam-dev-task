@@ -1,120 +1,93 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useRef } from "react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { Draggable } from "gsap/Draggable"
+import { useRef, useState } from "react"
 import CustomButton from "./customButton"
 import MovieTitle from "./movieTitle"
 
 interface CardProps {
     image: string;
-    index: number;
-    yOffset: number;
-    scrollContainerRef: React.RefObject<HTMLDivElement | null>;
     title: string;
     director: string;
-    totalItems: number;
-    itemHeight: number;
 }
 
 const CARD_HEIGHT = 600
 
-gsap.registerPlugin(ScrollTrigger, Draggable)
-
 const MovieCard: React.FC<CardProps> = ({
     image,
-    index,
-    yOffset,
-    scrollContainerRef,
     title,
     director,
-    totalItems,
-    itemHeight,
 }) => {
     const cardRef = useRef<HTMLDivElement>(null)
     const imageRef = useRef<HTMLImageElement>(null)
 
-    useEffect(() => {
-        if (!imageRef.current) return;
+    // Parallax effect state
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-        // Calculate the card's position in the carousel (0 to 1)
-        const progress = yOffset / ((totalItems * itemHeight) - window.innerHeight);
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!cardRef.current) return;
         
-        // Only apply parallax if the card is in or near the viewport
-        const cardPosition = (index * itemHeight) / (totalItems * itemHeight);
-        const viewportProgress = 1 - Math.abs(progress - cardPosition) * 2;
+        const rect = cardRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
         
-        if (viewportProgress > 0) {
-            // Apply parallax effect based on card's position in the carousel
-            const parallaxAmount = 20 * viewportProgress;
-            gsap.to(imageRef.current, {
-                yPercent: -parallaxAmount,
-                ease: "none",
-                overwrite: true,
-                duration: 0.1
-            });
-        }
+        // Calculate position as percentage (0-1)
+        const xPos = x / rect.width;
+        const yPos = y / rect.height;
+        
+        // Calculate movement (smaller divisor = more movement)
+        setMousePosition({
+            x: (xPos - 0.5) * 30, // 15px max movement
+            y: (yPos - 0.5) * 20  // 10px max movement
+        });
+    };
 
-        // Setup a scroll event listener for smooth updates
-        const onScroll = () => {
-            const newProgress = (scrollContainerRef.current?.scrollTop || 0) / ((totalItems * itemHeight) - window.innerHeight);
-            const newViewportProgress = 1 - Math.abs(newProgress - cardPosition) * 2;
-            
-            if (newViewportProgress > 0) {
-                const parallaxAmount = 20 * newViewportProgress;
-                gsap.to(imageRef.current, {
-                    yPercent: -parallaxAmount,
-                    ease: "none",
-                    overwrite: true,
-                    duration: 0.1
-                });
-            }
-        };
-
-        const container = scrollContainerRef.current;
-        if (container) {
-            container.addEventListener('scroll', onScroll);
-        }
-
-        return () => {
-            if (container) {
-                container.removeEventListener('scroll', onScroll);
-            }
-        };
-    }, [yOffset, index, totalItems, itemHeight, scrollContainerRef])
+    const handleMouseLeave = () => {
+        setMousePosition({ x: 0, y: 0 });
+    };
 
     return (
         <>
             <svg width="0" height="0">
                 <clipPath id="kafkaClip" clipPathUnits="userSpaceOnUse">
-                    <path d="M1290.17 1.43652C1344.88 -0.561488 1396.54 42.381 1397.23 97.041C1397.73 136.392 1397.8 182.58 1398.5 232.955L1398.65 243.085C1401.48 425.103 1400.74 643.288 1393.95 718.938C1392.34 736.972 1380.67 749.681 1362.68 751.409C1269.71 760.344 947.947 759.428 642.174 756.274C336.431 753.122 46.7062 747.733 17.8745 747.733C14.7454 747.733 12.1532 746.051 9.99756 742.675C7.8314 739.282 6.14462 734.23 4.85791 727.639C2.286 714.464 1.34647 695.327 1.21826 671.518C1.0901 647.716 1.77215 619.283 2.43213 587.527C3.0508 557.76 3.65021 525.078 3.54346 490.573L3.51221 483.648C3.02856 401.249 1.59875 310.538 1.70947 231.364C1.82021 152.179 3.47278 84.5914 9.146 48.4297C12.0833 29.7071 25.7034 14.0119 44.3745 11.2119C67.7613 7.70495 105.615 6.3455 153.977 6.14844C202.329 5.95142 261.154 6.91678 326.468 8.05371C457.088 10.3274 613.652 13.2863 764.242 9.00391L764.243 9.00488C972.303 8.60929 1172.82 5.72202 1290.17 1.43652Z" stroke="black" />
+
+                <path d="M1291.19 0.453125C1314.67 0.501087 1333.55 17.929 1334.57 41.3643C1336.17 78.0828 1335.83 128.234 1336.86 185.407L1336.96 190.962C1339.62 327.366 1339.35 492.452 1333 551.787C1331.43 566.5 1320.29 576.975 1305.55 578.536C1221 587.489 910.939 593.912 615.898 594.505C468.385 594.801 324.637 593.64 214.723 590.609C159.765 589.094 113.27 587.111 78.9951 584.61C61.8568 583.36 47.7799 581.98 37.2305 580.466C31.9555 579.708 27.5689 578.919 24.126 578.096C20.8878 577.322 18.5177 576.526 17.0293 575.72L16.7432 575.559C10.4294 571.837 6.39775 564.535 3.92676 553.784C1.45737 543.04 0.567314 528.942 0.460938 511.756C0.3546 494.574 1.03116 474.339 1.68262 451.327C2.29325 429.757 2.88148 405.756 2.78125 379.565L2.75195 374.298C2.30513 313.628 1.01325 247.056 1.02148 188.204C1.02973 129.344 2.33892 78.2594 7.08496 48.5684C9.9218 30.8219 23.8314 13.0689 41.4619 10.1963C63.7568 6.56383 100.131 5.29971 146.636 5.34961C193.131 5.3995 249.721 6.76294 312.433 8.37988C437.85 11.6136 587.743 15.8603 730.267 12.6299L730.266 12.6289C856.864 12.4369 971.714 9.34149 1067.61 6.31934C1163.51 3.29692 1240.43 0.349453 1291.19 0.453125Z" stroke="black"/>
                 </clipPath>
             </svg>
 
             <div
                 ref={cardRef}
-                className="relative w-full overflow-hidden"
+                className="relative w-full overflow-hidden transition-transform duration-300 ease-out"
                 style={{
                     height: `${CARD_HEIGHT}px`,
+                    width: "1340px",
                     borderRadius: "1.5rem",
                     boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
                     clipPath: "url(#kafkaClip)", // Apply your custom clip path
+                    transform: `perspective(1000px) rotateX(${mousePosition.y * -0.5}deg) rotateY(${mousePosition.x * 0.5}deg)`,
                 }}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
             >
-                <img
-                    ref={imageRef}
-                    src={image}
-                    alt={title}
-                    className="right-0 left-0 z-0 absolute w-full h-full object-cover origin-center select-none"
+                <div 
+                    className="absolute inset-0 w-full h-full transition-transform duration-300 ease-out"
                     style={{
-                        transform: `scale(1.25)`, // Keep scaled up
-                        filter: "brightness(0.85) contrast(1.1) saturate(1.1)",
-                        willChange: "transform",
+                        transform: `translateX(${mousePosition.x * -1}px) translateY(${mousePosition.y * -1}px) scale(1.05)`,
                     }}
-                    draggable={false}
-                />
+                >
+                    <img
+                        ref={imageRef}
+                        src={image}
+                        alt={title}
+                        className="absolute inset-0 w-full h-full object-cover origin-center select-none"
+                        style={{
+                            transform: 'scale(1.0)',
+                            filter: "brightness(0.85) contrast(1.1) saturate(1.1)",
+                            willChange: "transform",
+                        }}
+                        draggable={false}
+                    />
+                </div>
 
                 <div className="z-10 absolute inset-0 flex flex-row justify-between p-16 font-family-neue text-white">
                     {/* Left section */}
