@@ -74,15 +74,15 @@ const MovieCard: React.FC<CardProps> = ({
                             <div className="flex flex-col gap-0 border-swhite border-t font-medium text-[20px] uppercase">
                                 <div className="flex flex-row gap-20 pl-5 border-swhite border-b-2 leading-[98%]">
                                     <h2 className="-mt-[1px] -mb-[5px]">Director</h2>
-                                    <p className="-mt-[1px] -mb-[5px]">{director}</p>
+                                    <p className="-mt-[1px] -mb-[5px] pr-10">{director}</p>
                                 </div>
                                 <div className="flex flex-row gap-32 pl-16 border-swhite border-b-2 leading-[98%]">
                                     <h2 className="-mt-[1px] -mb-[5px]">Year</h2>
-                                    <p className="-mt-[1px] -mb-[5px]">2024</p>
+                                    <p className="-mt-[1px] -mb-[5px] pr-10">2024</p>
                                 </div>
                                 <div className="flex flex-row gap-20 pl-10 border-swhite border-b-2 leading-[98%]">
                                     <h2 className="-mt-[1px] -mb-[5px]">Category</h2>
-                                    <p className="-mt-[1px] -mb-[5px]">Documentary</p>
+                                    <p className="-mt-[1px] -mb-[5px] pr-10">Documentary</p>
                                 </div>
                             </div>
                         </div>
@@ -129,7 +129,7 @@ const MovieCard: React.FC<CardProps> = ({
                                 width2={42}
                                 size={5}
                                 mainclass="text-[12px] leading-[0] tracking-widest uppercase font-family-neue"
-                                beforeclass="bg-none text-swhite"
+                                beforeclass="bg-transparent text-swhite"
                                 afterclass="bg-swhite text-black"
                                 strokeColor="#FAF7EF"
                                 strokeWidth={2}

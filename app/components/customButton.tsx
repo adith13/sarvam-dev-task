@@ -76,8 +76,8 @@ const CustomButton: React.FC<CustomButtonProps> = ({
           className={`relative w-full h-full ${hovering ? afterclass : beforeclass}`}
         >
           <div className="top-0 left-0 relative flex flex-col justify-center items-center w-full h-full">
-            <div className="relative flex flex-col justify-start items-start pt-[1px] w-fit h-[12px] overflow-hidden">
-              <motion.p className="relative font-family-neue text-[12px] uppercase leading-[96%] tracking-widest"
+            <div className="relative flex flex-col justify-start items-start pt-[1px] w-fit h-3 overflow-hidden">
+              <motion.p className="relative h-3 font-family-neue text-[12px] uppercase leading-[96%] tracking-widest"
                 variants={{
                   initial: { y: 0  },
                   hover: { y: "-100%" },
@@ -86,7 +86,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
               >
                 {children}
               </motion.p>
-              <motion.p className="font-family-neue text-[12px] uppercase leading-[96%] tracking-widest"
+              <motion.p className="h-3 font-family-neue text-[12px] uppercase leading-[96%] tracking-widest"
                 variants={{
                   initial: { y: 0},
                   hover: { y: "-100%" },

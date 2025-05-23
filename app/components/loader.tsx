@@ -47,9 +47,9 @@ const Loader = () => {
 
                         <div className="flex flex-col gap-14">
                             <motion.div
-                                initial={{ scale: 0.8 }}
+                                initial={{ scale: 0.7 }}
                                 animate={{ scale: 1 }}
-                                transition={{ duration: 0.8, ease: "easeInOut" }}
+                                transition={{ duration: 1.7, ease: "easeOut" }}
                                 className="w-fit h-fit"
                             >
                                 <svg
@@ -67,7 +67,7 @@ const Loader = () => {
                             <motion.p
                                 initial={{ scale: 0.8, opacity: 0, filter: "blur(8px)" }}
                                 animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-                                transition={{ duration: 0.5, delay: 2 }}
+                                transition={{ duration: 1, delay: 1.5 }}
                                 className="relative -mt-10 -mr-5 font-family-neue font-extralight text-swhite text-xl text-center uppercase tracking-[23px] b mix-blend-difference"
                             >
                                 film foundation
