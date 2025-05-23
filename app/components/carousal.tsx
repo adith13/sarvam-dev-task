@@ -29,14 +29,16 @@ const FilmRollCarousel = () => {
 
     const totalHeight = movies.length * ITEM_HEIGHT;
     const centerOffset = window.innerHeight / 2 - ITEM_HEIGHT / 2;
-
     const initialY = centerOffset;
+
     gsap.set(container, { y: initialY });
 
     const minY = window.innerHeight - totalHeight;
     const maxY = centerOffset;
-
     const clampY = gsap.utils.clamp(minY, maxY);
+
+    let _y = initialY;
+    console.log("_y", _y);
 
     const applyCardEffects = (currentY: number) => {
       movies.forEach((_, index) => {
@@ -55,11 +57,8 @@ const FilmRollCarousel = () => {
 
         const parallaxOffset = distanceFromCenter * 0.35;
 
-        gsap.to(img, {
+        gsap.set(img, {
           y: -parallaxOffset,
-          ease: "power1.out",
-          overwrite: true,
-          duration: 0.2,
         });
 
         const maxDistanceForEffect = ITEM_HEIGHT * 1.5;
@@ -67,19 +66,13 @@ const FilmRollCarousel = () => {
         const scale = gsap.utils.mapRange(0, 1, 1, 0.8)(normalizedDistance);
         const opacity = gsap.utils.mapRange(0, 1, 1, 0.5)(normalizedDistance);
 
-        gsap.to(cardElement, {
+        gsap.set(cardElement, {
           scale,
           opacity,
-          ease: "power1.out",
-          overwrite: true,
-          duration: 0.2,
         });
 
-        gsap.to(content, {
+        gsap.set(content, {
           y: parallaxOffset,
-          ease: "power1.out",
-          overwrite: true,
-          duration: 0.2,
         });
       });
     };
@@ -94,26 +87,30 @@ const FilmRollCarousel = () => {
           return clampY(snappedY);
         },
       },
-      onDrag: function () {
-        applyCardEffects(clampY(this.y));
-      },
-      onThrowUpdate: function () {
-        applyCardEffects(clampY(this.y));
-      },
       onPress: function () {
-        applyCardEffects(clampY(this.y));
+        _y = this.y;
       },
-      onDragEnd: function () {
-        applyCardEffects(clampY(this.y));
+      onDrag: function () {
+        _y = this.y;
+      },
+      onRelease: function () {
+        _y = this.y;
       },
     })[0];
 
-    applyCardEffects(initialY);
+    const update = () => {
+      const currentY = clampY(gsap.getProperty(container, "y") as number);
+      applyCardEffects(currentY);
+    };
+
+    gsap.ticker.add(update);
 
     return () => {
       dragInstance?.kill();
+      gsap.ticker.remove(update);
     };
   }, []);
+
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
