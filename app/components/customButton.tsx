@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { CustomDiv } from "./customDiv";
+import { useState } from "react";
 
 const ChevronIcon: React.FC<{ color: string }> = ({ color }) => {
   return (
@@ -43,6 +44,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   strokeWidth = 2,
 }) => {
 
+  const [hovering, setHovering] = useState(false);
 
   const playHoverSound = () => {
     const audio = new Audio('/sounds/cta_in.mp3');
@@ -54,8 +56,12 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   return (
     <motion.button
       onClick={onClick}
-      onMouseEnter={playHoverSound}
+      onMouseEnter={() => {
+        playHoverSound();
+        setHovering(true);
+      }}
       whileHover="hover"
+      onMouseLeave={() => setHovering(false)}
       initial="initial"
       animate="initial"
       className="flex flex-row justify-center w-full h-full hover:cursor-pointer"
@@ -66,31 +72,34 @@ const CustomButton: React.FC<CustomButtonProps> = ({
         strokeColor={strokeColor}
         strokeWidth={strokeWidth}
       >
-        <motion.div
-          className="relative w-full h-full"
+        <div
+          className={`relative w-full h-full ${hovering ? afterclass : beforeclass}`}
         >
-          <motion.p
-            className={`absolute flex justify-center items-center w-full h-full ${beforeclass}`}
-            variants={{
-              initial: { y: 0, opacity: 1 },
-              hover: { y: -50, opacity: 0 },
-            }}
-            transition={{ duration: 0.3 }}
-          >
-            {children}
-          </motion.p>
+          <div className="top-0 left-0 relative flex flex-col justify-center items-center w-full h-full">
+            <div className="relative flex flex-col justify-start items-start pt-[1px] w-fit h-[12px] overflow-hidden">
+              <motion.p className="relative font-family-neue text-[12px] uppercase leading-[96%] tracking-widest"
+                variants={{
+                  initial: { y: 0  },
+                  hover: { y: "-100%" },
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                {children}
+              </motion.p>
+              <motion.p className="font-family-neue text-[12px] uppercase leading-[96%] tracking-widest"
+                variants={{
+                  initial: { y: 0},
+                  hover: { y: "-100%" },
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                {children}
+              </motion.p>
+            </div>
+          </div>
 
-          <motion.p
-            className={`absolute flex justify-center items-center w-full h-full ${afterclass}`}
-            variants={{
-              initial: { y: 50, opacity: 0 },
-              hover: { y: 0, opacity: 1 },
-            }}
-            transition={{ duration: 0.3 }}
-          >
-            {children}
-          </motion.p>
-        </motion.div>
+
+        </div>
       </CustomDiv>
 
       {/* Chevron Container */}

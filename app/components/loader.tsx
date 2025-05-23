@@ -88,9 +88,9 @@ const Loader = () => {
                                 width1={96}
                                 width2={42}
                                 size={5}
-                                mainclass="text-[12px] leading-[0] tracking-widest uppercase  font-family-neue"
-                                beforeclass="bg-black text-swhite"
-                                afterclass="bg-swhite text-black"
+                                mainclass="text-[12px] leading-[0] tracking-widest uppercase font-family-neue"
+                                beforeclass="bg-black text-white"
+                                afterclass="bg-white text-black"
                                 strokeColor="#FAF7EF"
                                 strokeWidth={3}
                             >

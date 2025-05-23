@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
+import MovieCard from "./card";
 import gsap from "gsap";
 import { Draggable } from "gsap/Draggable";
 import { InertiaPlugin } from "gsap/InertiaPlugin";
-import MovieCard from "./card";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(Draggable, InertiaPlugin);
@@ -13,88 +13,102 @@ if (typeof window !== "undefined") {
 const ITEM_HEIGHT = 630;
 
 const movies = [
-  {
-    id: 1,
-    image: "https://film-grab.com/wp-content/uploads/2020/04/08-752.jpg",
-    title: "TABOO",
-    director: "SHAULY MELAMED",
-  },
-  {
-    id: 2,
-    image: "https://cdn.cosmos.so/fc5ac665-12e9-43cd-a15e-42e452da6042?format=jpeg",
-    title: "ANA MAXIM",
-    director: "GUY RITCHIE",
-  },
-  {
-    id: 3,
-    image: "https://cdn.cosmos.so/86ef199a-71ba-4f6d-b0c8-ea3a4870f269?format=jpeg",
-    title: "OUTSIDER FREUD",
-    director: "Chris Nolan",
-  },
-  {
-    id: 4,
-    image: "https://cdn.cosmos.so/e42117c6-7f07-4812-b7e8-7b0c58694aef?format=jpeg",
-    title: "SAVOY",
-    director: "Tony Stark",
-  },
-  {
-    id: 5,
-    image: "https://cdn.cosmos.so/8497ef2b-aa76-41af-9081-46a9bf4d541a?format=jpeg",
-    title: "SARVAM",
-    director: "Adith Narein",
-  },
+  { id: 1, image: "https://film-grab.com/wp-content/uploads/2020/04/08-752.jpg", title: "TABOO", director: "SHAULY MELAMED" },
+  { id: 2, image: "https://cdn.cosmos.so/fc5ac665-12e9-43cd-a15e-42e452da6042?format=jpeg", title: "ANA MAXIM", director: "GUY RITCHIE" },
+  { id: 3, image: "https://cdn.cosmos.so/86ef199a-71ba-4f6d-b0c8-ea3a4870f269?format=jpeg", title: "OUTSIDER FREUD", director: "Chris Nolan" },
+  { id: 4, image: "https://cdn.cosmos.so/e42117c6-7f07-4812-b7e8-7b0c58694aef?format=jpeg", title: "SAVOY", director: "Tony Stark" },
+  { id: 5, image: "https://cdn.cosmos.so/8497ef2b-aa76-41af-9081-46a9bf4d541a?format=jpeg", title: "SARVAM", director: "Adith Narein" },
 ];
 
 const FilmRollCarousel = () => {
   const listRef = useRef<HTMLDivElement>(null);
-  const fullList = [...movies, ...movies];
-  const numOriginalMovies = movies.length;
-  let _currentLogicalY = 0;
 
   useEffect(() => {
     const container = listRef.current;
     if (!container) return;
 
-    const totalHeightOfOneSet = numOriginalMovies * ITEM_HEIGHT;
+    const totalHeight = movies.length * ITEM_HEIGHT;
     const centerOffset = window.innerHeight / 2 - ITEM_HEIGHT / 2;
 
-    const initialY = centerOffset - (numOriginalMovies * ITEM_HEIGHT);
+    const initialY = centerOffset;
     gsap.set(container, { y: initialY });
 
-    const wrapMin = -totalHeightOfOneSet;
-    const wrapMax = 0;
+    const minY = window.innerHeight - totalHeight;
+    const maxY = centerOffset;
 
-    _currentLogicalY = initialY;
+    const clampY = gsap.utils.clamp(minY, maxY);
+
+    const applyCardEffects = (currentY: number) => {
+      movies.forEach((_, index) => {
+        const imageId = `card-${index}`;
+        const contentId = `content-${index}`;
+        const img = document.getElementById(imageId);
+        const content = document.getElementById(contentId);
+
+        const cardWrapper = container.children[index];
+        const cardElement = cardWrapper?.firstElementChild as HTMLElement;
+
+        if (!img || !cardElement || !content) return;
+
+        const cardAbsoluteY = currentY + index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
+        const distanceFromCenter = cardAbsoluteY - window.innerHeight / 2;
+
+        const parallaxOffset = distanceFromCenter * 0.35;
+
+        gsap.to(img, {
+          y: -parallaxOffset,
+          ease: "power1.out",
+          overwrite: true,
+          duration: 0.2,
+        });
+
+        const maxDistanceForEffect = ITEM_HEIGHT * 1.5;
+        const normalizedDistance = Math.min(1, Math.abs(distanceFromCenter) / maxDistanceForEffect);
+        const scale = gsap.utils.mapRange(0, 1, 1, 0.8)(normalizedDistance);
+        const opacity = gsap.utils.mapRange(0, 1, 1, 0.5)(normalizedDistance);
+
+        gsap.to(cardElement, {
+          scale,
+          opacity,
+          ease: "power1.out",
+          overwrite: true,
+          duration: 0.2,
+        });
+
+        gsap.to(content, {
+          y: parallaxOffset,
+          ease: "power1.out",
+          overwrite: true,
+          duration: 0.2,
+        });
+      });
+    };
 
     const dragInstance = Draggable.create(container, {
       type: "y",
       inertia: true,
+      bounds: { minY, maxY },
       snap: {
         y: (y) => {
-          const logicalY = y - initialY;
-          const nearestIndex = Math.round(logicalY / ITEM_HEIGHT);
-          const snappedLogicalY = nearestIndex * ITEM_HEIGHT;
-          const targetPhysicalY = snappedLogicalY + initialY;
-          const wrappedY = gsap.utils.wrap(wrapMin, wrapMax, targetPhysicalY);
-
-          return wrappedY;
+          const snappedY = Math.round((y - initialY) / ITEM_HEIGHT) * ITEM_HEIGHT + initialY;
+          return clampY(snappedY);
         },
       },
-      
-      wrapY: [wrapMin, wrapMax],
       onDrag: function () {
-        _currentLogicalY = this.y - initialY;
+        applyCardEffects(clampY(this.y));
       },
       onThrowUpdate: function () {
-        _currentLogicalY = this.y - initialY;
-      },
-      onThrowComplete: function () {
-        _currentLogicalY = this.y - initialY;
+        applyCardEffects(clampY(this.y));
       },
       onPress: function () {
-        _currentLogicalY = this.y - initialY;
+        applyCardEffects(clampY(this.y));
+      },
+      onDragEnd: function () {
+        applyCardEffects(clampY(this.y));
       },
     })[0];
+
+    applyCardEffects(initialY);
 
     return () => {
       dragInstance?.kill();
@@ -111,16 +125,17 @@ const FilmRollCarousel = () => {
         className="flex flex-col items-center cursor-grab will-change-transform"
         style={{ touchAction: "none", userSelect: "none" }}
       >
-        {fullList.map((movie, index) => (
+        {movies.map((movie, index) => (
           <div
-            key={`${movie.id}-${index}`}
-            className="flex flex-col justify-center items-center w-11/12"
+            key={movie.id}
+            className="flex flex-col justify-center items-center w-11/12 overflow-hidden"
             style={{ height: `${ITEM_HEIGHT}px` }}
           >
             <MovieCard
               image={movie.image}
               title={movie.title}
               director={movie.director}
+              index={index}
             />
           </div>
         ))}

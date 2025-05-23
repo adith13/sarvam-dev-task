@@ -5,15 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { CustomDiv } from "./customDiv";
 
-// interface NavbarProps {
-//     children?: React.ReactNode;
-//     className?: string;
-//     height?: number;
-//     width?: number;
-//     size?: number;
-//     strokeColor?: string;
-//     strokeWidth?: number;
-// }
+
 const ArrowButton = () => (
     <button className="flex justify-center items-center p-1.5 border-2 border-black border-dotted rounded-md hover:bg-black bg-none text-black hover:text-swhite transition duration-300 ease-in-out">
         <svg
@@ -311,11 +303,11 @@ export default function Navbar() {
                                                 className="z-10 rounded-xs w-4 h-4 object-cover"
                                             />
 
-                                            <div className="z-10 overflow-hidden">
+                                            <div className="z-10 py-1 overflow-hidden">
                                                 <motion.p
-                                                    initial={{ y: "100%" }}
+                                                    initial={{ y: "110%" }}
                                                     animate={{ y: 0 }}
-                                                    exit={{ y: "100%" }}
+                                                    exit={{ y: "110%" }}
                                                     transition={{ duration: 0.5, ease: "easeInOut", delay: 0.1 }}
                                                     className="-mb-[2px] text-xs leading-[95%]">
                                                     {movie.title}
